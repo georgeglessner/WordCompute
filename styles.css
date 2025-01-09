@@ -138,3 +138,48 @@ h1 {
     font-size: 24px;
     /*margin-left: 5px;*/
 }
+
+/* Add these styles to your existing styles.css */
+
+/* Mobile styles */
+@media (max-width: 600px) {
+    body {
+        margin: 10px;
+    }
+
+    .grid {
+        grid-template-columns: repeat(9, 30px);
+        grid-gap: 3px;
+    }
+
+    .box {
+        width: 30px;
+        height: 30px;
+        line-height: 30px;
+        font-size: 14px;
+    }
+
+    .keyboard {
+        grid-template-columns: repeat(10, 1fr);
+        gap: 5px;
+        max-width: 100%;
+    }
+
+    .key {
+        padding: 8px;
+        font-size: 16px;
+    }
+
+    .key.special {
+        width: 60px;
+        font-size: 12px;
+    }
+
+    .modal-content {
+        width: 90%;
+    }
+
+    #help-icon {
+        font-size: 20px;
+    }
+}

@@ -11,6 +11,8 @@
 <body>
 <h1>Word Compute</h1>
 <p>Find the correct 5-letter word and computation to reach the target number!</p>
+<span id="help-icon">❓</span>
+
 <p>Target Number: <strong id="target-number"></strong></p>
 
 <p>Last Computation: <span id="last-computation"></span></p>
@@ -18,12 +20,12 @@
 <div class="grid" id="grid"></div>
 
 <div class="keyboard" id="keyboard"></div>
+<div class="keyboard-operators" id="keyboard-operators"></div>
 <div class="keyboard-special">
     <div class="key special" id="backspace">BACKSPACE</div>
     <div class="key special" id="enter">ENTER</div>
 </div>
 
-<span id="help-icon">❓</span>
 
 
 <!-- Modal -->
@@ -34,8 +36,9 @@
         <p>To play the game, you need to find the correct word and computation to reach the target number. Use the
             keyboard to input letters and operators. Press ENTER to submit your answer. If the word is correct and the
             computation matches the target number, you win!
-<br><br>
-            Each word is 5 letters long and each letter must be separated by an operand. For example "s+c-o*r+e" is valid.
+            <br><br>
+            Each word is 5 letters long and each letter must be separated by an operand. For example "s+c-o*r+e" is
+            valid.
         </p>
         <h2>About</h2>
         <p> This game is inspired by <a href="https://www.nytimes.com/games/wordle/index.html">Wordle</a> and <a
@@ -144,20 +147,32 @@
     });
 
     // Generate keyboard
-    letters.forEach(letter => {
-        const key = document.createElement("div");
-        key.className = "key";
-        key.innerHTML = `${letter}<span class='subscript'>${letterValue(letter)}</span>`;
-        key.onclick = () => handleKeyInput(letter);
-        keyboardContainer.appendChild(key);
+    const qwertyLayout = [
+        "QWERTYUIOP",
+        "ASDFGHJKL",
+        "ZXCVBNM"
+    ];
+
+    qwertyLayout.forEach(row => {
+        row.split("").forEach(letter => {
+            const key = document.createElement("div");
+            key.className = "key";
+            key.innerHTML = `${letter}<span class='subscript'>${letterValue(letter)}</span>`;
+            key.onclick = () => handleKeyInput(letter);
+            keyboardContainer.appendChild(key);
+        });
+        const br = document.createElement("br");
+        keyboardContainer.appendChild(br);
     });
 
+    // Generate operators
+    const operatorsContainer = document.getElementById("keyboard-operators");
     operators.forEach(op => {
         const key = document.createElement("div");
         key.className = "key";
         key.textContent = op;
         key.onclick = () => handleKeyInput(op);
-        keyboardContainer.appendChild(key);
+        operatorsContainer.appendChild(key);
     });
 
     document.getElementById("backspace").onclick = handleBackspace;
@@ -300,6 +315,16 @@
 
         if (solutionCorrect && computedValue === targetNumber) {
             isSolved = true;
+            const emojiGrid = generateEmojiGrid();
+            const shareButton = document.createElement("button");
+            shareButton.textContent = "Share";
+            shareButton.className = "share-button";
+            shareButton.onclick = () => {
+                navigator.clipboard.writeText(emojiGrid).then(() => {
+                    alert("Grid copied to clipboard!");
+                });
+            };
+            document.body.appendChild(shareButton);
             return;
         }
 
@@ -338,6 +363,29 @@
             box.classList.remove("yellow");
             box.classList.remove("grey");
         }
+    }
+
+    function generateEmojiGrid() {
+        const gridBoxes = document.querySelectorAll(".box");
+        let emojiGrid = `Word Compute - ${new Date().toLocaleDateString()}\n\n`;
+
+        for (let row = 0; row < maxRows; row++) {
+            for (let col = 0; col < maxCols; col++) {
+                const box = gridBoxes[row * maxCols + col];
+                if (box.classList.contains("green")) {
+                    emojiGrid += "🟩";
+                } else if (box.classList.contains("yellow")) {
+                    emojiGrid += "🟨";
+                } else if (box.classList.contains("grey")) {
+                    emojiGrid += "⬛";
+                } else {
+                    emojiGrid += "⬜";
+                }
+            }
+            emojiGrid += "\n";
+        }
+
+        return emojiGrid;
     }
 
     function initializeGame() {

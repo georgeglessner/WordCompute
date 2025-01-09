@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Word Compute</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <h1>Word Compute</h1>
+    <p>Target Number: <strong id="target-number"></strong></p>
+    <p>Find the correct word and computation to reach the target number!</p>
+
+    <p>Last Computation: <span id="last-computation"></span></p>
+
+    <p id="message"></p>
+
+    <div class="grid" id="grid"></div>
+
+    <div class="keyboard" id="keyboard"></div>
+    <div class="keyboard-special">
+        <div class="key special" id="backspace">BACKSPACE</div>
+        <div class="key special" id="enter">ENTER</div>
+    </div>
+
+    <script type="module">
+        import { data } from './wordlist.js';
+
+        function seededRandom(seed) {
+            const x = Math.sin(seed) * 10000;
+            return x - Math.floor(x);
+        }
+
+        function getSeedForToday() {
+            const today = new Date();
+            return today.getFullYear() * 10000 + (today.getMonth() + 1) * 100 + today.getDate();
+        }
+
+        function getWordOfTheDay() {
+            const dayIndex = Math.floor(Date.now() / (1000 * 60 * 60 * 24)) % data.length;
+            return data[dayIndex].toUpperCase();
+        }
+
+        function generateComputation(word) {
+            const seed = getSeedForToday();
+            const operators = ['+', '-', '*'];
+            let computation = '';
+
+            for (let i = 0; i < word.length; i++) {
+                computation += word[i];
+                if (i < word.length - 1) {
+                    const randomIndex = Math.floor(seededRandom(seed + i) * operators.length);
+                    computation += operators[randomIndex];
+                }
+            }
+
+            return computation;
+        }
+
+        function calculateTargetNumber(computation) {
+            try {
+                const parsedComputation = computation.split('').map(char => {
+                    if (letters.includes(char)) {
+                        return letterValue(char);
+                    }
+                    return char;
+                }).join('');
+
+                const result = eval(parsedComputation);
+
+                // Ensure the result is an integer
+                if (Number.isInteger(result)) {
+                    return result;
+                } else {
+                    return null;
+                }
+            } catch {
+                return null;
+            }
+        }
+        const maxRows = 6;
+        const maxCols = 9;
+        let currentRow = 0;
+        let currentCol = 0;
+        let isSolved = false;
+
+        let wordOfTheDay;
+        let computation;
+        let targetNumber;
+
+
+        const gridContainer = document.getElementById("grid");
+        const keyboardContainer = document.getElementById("keyboard");
+        const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+        const operators = ["+", "-", "*", "/"];
+
+        // Generate grid
+        const gridSize = maxRows * maxCols;
+        const grid = Array(gridSize).fill(null);
+        grid.forEach(() => {
+            const box = document.createElement("div");
+            box.className = "box";
+            gridContainer.appendChild(box);
+        });
+
+        // Generate keyboard
+        letters.forEach(letter => {
+            const key = document.createElement("div");
+            key.className = "key";
+            key.innerHTML = `${letter}<span class='subscript'>${letterValue(letter)}</span>`;
+            key.onclick = () => handleKeyInput(letter);
+            keyboardContainer.appendChild(key);
+        });
+
+        operators.forEach(op => {
+            const key = document.createElement("div");
+            key.className = "key";
+            key.textContent = op;
+            key.onclick = () => handleKeyInput(op);
+            keyboardContainer.appendChild(key);
+        });
+
+        document.getElementById("backspace").onclick = handleBackspace;
+        document.getElementById("enter").onclick = handleEnter;
+
+        function letterValue(letter) {
+            return letter.toUpperCase().charCodeAt(0) - 64;
+        }
+
+        function handleKeyInput(input) {
+            if (currentCol >= maxCols || isSolved) return;
+
+            const gridBoxes = document.querySelectorAll(".box");
+            const currentBox = gridBoxes[currentRow * maxCols + currentCol];
+
+            if (letters.includes(input)) {
+                currentBox.textContent = input;
+                currentBox.innerHTML = `${input}<span class='subscript'>${letterValue(input)}</span>`;
+            } else {
+                currentBox.textContent = input;
+            }
+
+            currentCol++;
+        }
+
+        function handleBackspace() {
+            if (currentCol > 0) {
+                currentCol--;
+                const gridBoxes = document.querySelectorAll(".box");
+                const currentBox = gridBoxes[currentRow * maxCols + currentCol];
+                currentBox.textContent = "";
+                currentBox.className = "box";
+            }
+        }
+
+        document.addEventListener("keydown", (event) => {
+            const key = event.key.toUpperCase();
+            if (letters.includes(key) || operators.includes(key)) {
+                handleKeyInput(key);
+            } else if (event.key === "Enter") {
+                handleEnter();
+                if (isSolved) {
+                    alert("Congratulations! You've solved the puzzle!");
+                }
+            } else if (event.key === "Backspace") {
+                handleBackspace();
+            }
+        });
+
+        function computeRowValue(rowString) {
+            try {
+                const computation = rowString.split('').map(char => {
+                    if (letters.includes(char)) {
+                        return letterValue(char);
+                    } else {
+                        return char;
+                    }
+                }).join('');
+
+                return eval(computation);
+            } catch {
+                return null;
+            }
+        }
+
+        function handleEnter() {
+            if (currentCol < maxCols || isSolved) return;
+
+            const gridBoxes = document.querySelectorAll(".box");
+            const currentRowStart = currentRow * maxCols;
+            let solutionCorrect = true;
+            let rowString = "";
+
+            const wordRemaining = {};
+            const operatorRemaining = {};
+
+            // Count available letters and operators in the word and computation
+            for (const char of wordOfTheDay) {
+                wordRemaining[char] = (wordRemaining[char] || 0) + 1;
+            }
+
+            for (const char of computation) {
+                if (operators.includes(char)) {
+                    operatorRemaining[char] = (operatorRemaining[char] || 0) + 1;
+                }
+            }
+
+            for (let i = 0; i < maxCols; i++) {
+                const box = gridBoxes[currentRowStart + i];
+                const char = box.textContent.charAt(0); // Extract letter or operator
+                rowString += char;
+
+                if (i % 2 === 0) { // Letter position
+                    if (letters.includes(char)) {
+                        if (wordRemaining[char]) {
+                            if (char === wordOfTheDay[Math.floor(i / 2)]) {
+                                box.classList.add("green");
+                                updateKeyboardColor(char, "green");
+                            } else {
+                                box.classList.add("yellow");
+                                updateKeyboardColor(char, "yellow");
+                                solutionCorrect = false;
+                            }
+                            wordRemaining[char]--;
+                        } else {
+                            box.classList.add("grey");
+                            updateKeyboardColor(char, "grey");
+                            solutionCorrect = false;
+                        }
+                    }
+                } else { // Operator position
+                    if (operators.includes(char)) {
+                        if (operatorRemaining[char]) {
+                            if (char === computation[Math.floor(i / 2) * 2 + 1]) {
+                                box.classList.add("green");
+                                updateKeyboardColor(char, "green");
+                            } else {
+                                box.classList.add("yellow");
+                                updateKeyboardColor(char, "yellow");
+                                solutionCorrect = false;
+                            }
+                            operatorRemaining[char]--;
+                        } else {
+                            box.classList.add("grey");
+                            updateKeyboardColor(char, "grey");
+                            solutionCorrect = false;
+                        }
+                    }
+                }
+            }
+
+            const computedValue = computeRowValue(rowString);
+            if (computedValue === null) {
+                clearColors(currentRowStart);
+                alert("Invalid computation. Check your row!");
+                return;
+            }
+
+            if (!data.includes(rowString.replace(/[+\/*-]/g, "").toLowerCase())) {
+                clearColors(currentRowStart);
+                alert("Not a valid word!");
+                return;
+            }
+
+            document.getElementById("last-computation").textContent = computedValue;
+
+            if (solutionCorrect && computedValue === targetNumber) {
+                isSolved = true;
+                return;
+            }
+
+            currentRow++;
+            currentCol = 0;
+
+            if (currentRow >= maxRows) {
+                alert(`Game over! The correct solution was: ${computation}`);
+            }
+        }
+
+        function updateKeyboardColor(char, color) {
+            const keys = document.querySelectorAll(".key");
+            keys.forEach(key => {
+                if (key.textContent[0] === char && (!key.classList.contains("green") || color === "green")) {
+                    key.className = `key ${color}`;
+                }
+            });
+        }
+
+        function clearColors(currentRowStart) {
+            const gridBoxes = document.querySelectorAll(".box");
+            for (let i = 0; i < maxCols; i++) {
+                const box = gridBoxes[currentRowStart + i];
+                box.classList.remove("green");
+                box.classList.remove("yellow");
+                box.classList.remove("grey");
+            }
+        }
+
+        function initializeGame() {
+            wordOfTheDay = getWordOfTheDay();
+            computation = generateComputation(wordOfTheDay);
+            targetNumber = calculateTargetNumber(computation);
+
+            document.getElementById("target-number").textContent = targetNumber;
+        }
+
+        initializeGame();
+    </script>
+</body>
+
+</html>

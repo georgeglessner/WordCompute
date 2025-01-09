@@ -208,8 +208,16 @@
         }
     }
 
+    document.getElementById("enter").onclick = () => {
+        handleEnter();
+        if (isSolved) {
+            alert("Congratulations! You've solved the puzzle!");
+        }
+    };
+    
     document.addEventListener("keydown", (event) => {
         const key = event.key.toUpperCase();
+        console.log(event.key);
         if (letters.includes(key) || operators.includes(key)) {
             handleKeyInput(key);
         } else if (event.key === "Enter") {

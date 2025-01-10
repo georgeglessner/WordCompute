@@ -208,7 +208,7 @@
     }
 
     function handleKeyInput(input) {
-        if (currentCol >= maxCols || isSolved || gameOver) return;
+        if (currentCol > maxCols || isSolved || gameOver) return;
 
         const gridBoxes = document.querySelectorAll(".box");
         const currentBox = gridBoxes[currentRow * maxCols + currentCol];
@@ -225,7 +225,7 @@
     }
 
     function handleBackspace() {
-        if (currentCol >= maxCols || isSolved || gameOver) return;
+        if (currentCol > maxCols || isSolved || gameOver) return;
         if (currentCol > 0) {
             currentCol--;
             const gridBoxes = document.querySelectorAll(".box");
@@ -237,7 +237,7 @@
     }
 
     document.getElementById("enter").onclick = () => {
-        if (currentCol >= maxCols || isSolved || gameOver) return;
+        if (currentCol > maxCols || isSolved || gameOver) return;
         handleEnter();
         if (isSolved) {
             alert("Congratulations! You've solved the puzzle!");

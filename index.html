@@ -208,7 +208,7 @@
     }
 
     function handleKeyInput(input) {
-        if (currentCol > maxCols || isSolved || gameOver) return;
+        if (currentCol >= maxCols || isSolved || gameOver) return;
 
         const gridBoxes = document.querySelectorAll(".box");
         const currentBox = gridBoxes[currentRow * maxCols + currentCol];

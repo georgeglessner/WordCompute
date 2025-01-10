@@ -4,8 +4,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Word Compute</title>
+    <title>WordCompute</title>
     <link rel="stylesheet" href="styles.css">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="manifest" href="/site.webmanifest">
 </head>
 
 <body>
@@ -31,15 +35,17 @@
     <div class="modal-content">
         <span class="close">&times;</span>
         <h2>How to Play</h2>
-        <p>Find the correct 5-letter word and computation to reach the target number! Use the keyboard to input letters
+        <p>Find the correct 5-letter word <strong>and</strong> computation to reach the target number! Use the keyboard to input letters
             and operators. Press ENTER to submit your answer. If the word is correct and the computation matches the
             target number, you win!</p>
 
         <p>Each word is 5 letters long, and each letter must be followed by an operator.</p>
 
-        <p> For example, "s-c+o*r+e" is a valid guess.</p>
+        <p> For example, "S-C+O*R+E" is a valid guess.</p>
 
-        <p>Order of operations matters. For example, "s-c+o*r+e" is evaluated as "s-c+(o*r)+e" and evaluates to 291.</p>
+        <p>Each letter has a value associated with it. This value is the value used in the computation.</p>
+
+        <p>Order of operations matters. For example, "S-C+O*R+E" is evaluated as "S-C+(O*R)+E" and evaluates to 291.</p>
 
         <p> After each guess the tiles will change colors. Below are the colors and their meaning: </p>
         <ul class="no-bullets">
@@ -135,6 +141,7 @@
     let currentRow = 0;
     let currentCol = 0;
     let isSolved = false;
+    let gameOver = false;
 
     let wordOfTheDay;
     let computation;
@@ -205,6 +212,7 @@
         }
 
         currentCol++;
+        saveGameState();
     }
 
     function handleBackspace() {
@@ -214,6 +222,7 @@
             const currentBox = gridBoxes[currentRow * maxCols + currentCol];
             currentBox.textContent = "";
             currentBox.className = "box";
+            saveGameState();
         }
     }
 
@@ -342,6 +351,7 @@
 
         if (solutionCorrect && computedValue === targetNumber) {
             isSolved = true;
+            gameOver = true;
             displayShareButton();
             return;
         }
@@ -366,6 +376,7 @@
 
         if (currentRow >= maxRows) {
             alert(`Game over! The correct solution was: ${computation}`);
+            gameOver = true;
             displayShareButton();
         }
     }
@@ -381,6 +392,7 @@
             });
         };
         document.body.insertBefore(shareButton, gridContainer);
+        saveGameState();
     }
 
     function updateKeyboardColor(char, color) {
@@ -425,6 +437,69 @@
         return emojiGrid;
     }
 
+    function saveGameState() {
+        const gridBoxes = document.querySelectorAll(".box");
+        const gridState = Array.from(gridBoxes).map(box => ({
+            text: box.textContent.charAt(0), // Only save the letter
+            className: box.className,
+            subscript: box.querySelector('.subscript') ? box.querySelector('.subscript').textContent : ''
+        }));
+
+        const keyboardKeys = document.querySelectorAll(".key");
+        const keyboardState = Array.from(keyboardKeys).map(key => ({
+            text: key.textContent.charAt(0), // Only save the letter
+            className: key.className,
+            subscript: key.querySelector('.subscript') ? key.querySelector('.subscript').textContent : ''
+        }));
+
+        const gameState = {
+            currentRow,
+            currentCol,
+            gridState,
+            keyboardState,
+            gameOver
+        };
+
+        localStorage.setItem(`gameState-${getSeedForToday()}`, JSON.stringify(gameState));
+    }
+
+    function loadGameState() {
+        const savedState = localStorage.getItem(`gameState-${getSeedForToday()}`);
+        if (savedState) {
+            const gameState = JSON.parse(savedState);
+
+            currentRow = gameState.currentRow;
+            currentCol = gameState.currentCol;
+            gameOver = gameState.gameOver;
+
+            const gridBoxes = document.querySelectorAll(".box");
+            gameState.gridState.forEach((boxState, index) => {
+                gridBoxes[index].textContent = boxState.text;
+                gridBoxes[index].className = boxState.className;
+                if (boxState.subscript) {
+                    gridBoxes[index].innerHTML = `${boxState.text}<span class='subscript'>${boxState.subscript}</span>`;
+                }
+            });
+
+            const keyboardKeys = document.querySelectorAll(".key");
+            gameState.keyboardState.forEach((keyState, index) => {
+                keyboardKeys[index].textContent = keyState.text;
+                keyboardKeys[index].className = keyState.className;
+                if (keyState.subscript) {
+                    keyboardKeys[index].innerHTML = `${keyState.text}<span class='subscript'>${keyState.subscript}</span>`;
+                }
+            });
+
+            if (gameOver) {
+                displayShareButton();
+            }
+        }
+    }
+
+    function clearGameState() {
+        localStorage.removeItem(`gameState-${getSeedForToday()}`);
+    }
+
     function initializeGame() {
         wordOfTheDay = getWordOfTheDay();
         computation = generateComputation(wordOfTheDay);
@@ -434,7 +509,11 @@
         document.getElementById("current-seed").textContent = `#${getSeedForToday()}`;
     }
 
-    initializeGame();
+    document.addEventListener("DOMContentLoaded", () => {
+        initializeGame();
+        // clearGameState();
+        loadGameState();
+    });
 </script>
 </body>
 

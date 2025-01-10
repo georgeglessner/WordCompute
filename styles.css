@@ -208,6 +208,8 @@ ul.no-bullets {
 
 /* Add these styles to your existing styles.css */
 
+/* Add these styles to your existing styles.css */
+
 /* Mobile styles */
 @media (max-width: 600px) {
     body {
@@ -244,6 +246,20 @@ ul.no-bullets {
 
     .modal-content {
         width: 90%;
+        padding: 10px;
+        font-size: 14px;
+    }
+
+    .modal-content h2 {
+        font-size: 18px;
+    }
+
+    .modal-content p {
+        font-size: 14px;
+    }
+
+    .modal-content ul.no-bullets li {
+        font-size: 14px;
     }
 
     #help-icon {

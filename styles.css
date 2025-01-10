@@ -24,7 +24,6 @@ h1 {
     text-align: center;
     text-transform: uppercase;
     letter-spacing: 2px;
-    padding-bottom: 0.5em;
 }
 
 .grid {
@@ -81,7 +80,6 @@ h1 {
     display: flex;
     justify-content: center;
     gap: 10px;
-    margin: 10px auto;
 }
 
 .key {

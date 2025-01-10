@@ -104,6 +104,7 @@
     function getWordOfTheDay() {
         const seed = getSeedForToday();
         const seedIndex = seed % data.length;
+        console.log(data[seedIndex].toUpperCase())
         return data[seedIndex].toUpperCase();
     }
 

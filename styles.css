@@ -1,12 +1,30 @@
 body {
-    font-family: Arial, sans-serif;
-    text-align: center;
-    margin: 20px;
-    background-color: #f8f9fa;
+    font-family: 'Arial', sans-serif;
+    background-color: #e0f7fa;
+    color: #333;
+    margin: 0;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+}
+
+p {
+    font-size: 1.1em;
+    line-height: 1.5em;
+    margin: 0.5em 0;
+    color: #555;
 }
 
 h1 {
+    font-size: 2.5em;
     color: #343a40;
+    margin-bottom: 0.5em;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    padding-bottom: 0.5em;
 }
 
 .grid {
@@ -109,6 +127,12 @@ h1 {
     background-color: #6aaa64;
 }
 
+ul.no-bullets {
+    list-style-type: none; /* Remove bullets */
+    padding: 0; /* Remove padding */
+    margin: 0; /* Remove margins */
+}
+
 /* Add these styles to your existing styles.css */
 
 /* Modal styles */
@@ -176,6 +200,7 @@ h1 {
 .share-button:hover {
     background-color: #0056b3;
 }
+
 /* Add these styles to your existing styles.css */
 
 /* Mobile styles */
@@ -208,7 +233,7 @@ h1 {
     }
 
     .key.special {
-        width: 60px;
+        width: 70px;
         font-size: 12px;
     }
 

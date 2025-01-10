@@ -21,8 +21,8 @@
 <div class="keyboard" id="keyboard"></div>
 <div class="keyboard-operators" id="keyboard-operators"></div>
 <div class="keyboard-special">
-    <div class="key special" id="backspace">BACKSPACE</div>
-    <div class="key special" id="enter">ENTER</div>
+    <div class="key-special" id="backspace">BACKSPACE</div>
+    <div class="key-special" id="enter">ENTER</div>
 </div>
 
 
@@ -226,7 +226,6 @@
 
     document.addEventListener("keydown", (event) => {
         const key = event.key.toUpperCase();
-        console.log(event.key);
         if (letters.includes(key) || operators.includes(key)) {
             handleKeyInput(key);
         } else if (event.key === "Enter") {
@@ -380,7 +379,6 @@
 
     function updateKeyboardColor(char, color) {
         const keys = document.querySelectorAll(".key");
-        if (char === "BACKSPACE" || char === "ENTER") return;
         keys.forEach(key => {
             if (key.textContent[0] === char && (!key.classList.contains("green") || color === "green")) {
                 key.className = `key ${color}`;

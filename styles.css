@@ -72,7 +72,6 @@ h1 {
     grid-template-columns: repeat(10, 1fr);
     gap: 10px;
     justify-content: center;
-    margin: 20px auto;
     max-width: 500px;
 }
 
@@ -115,7 +114,15 @@ h1 {
     color: white;
 }
 
-.key.special {
+.key-special {
+    background-color: #e9ecef;
+    border: 1px solid #ced4da;
+    border-radius: 5px;
+    padding: 10px;
+    text-align: center;
+    font-size: 18px;
+    cursor: pointer;
+    position: relative;
     width: 80px; /* Larger size for special keys */
     justify-content: center;
     font-size: 14px;

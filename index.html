@@ -351,7 +351,13 @@
             const box = gridBoxes[currentRowStart + i];
             const char = box.textContent.charAt(0);
             if (letters.includes(char) || operators.includes(char)) {
-                updateKeyboardColor(char, box.classList.contains("green") ? "green" : box.classList.contains("yellow") ? "yellow" : "grey");
+                const currentColor = box.classList.contains("green") ? "green" : box.classList.contains("yellow") ? "yellow" : "grey";
+                const keyElement = Array.from(document.querySelectorAll(".key")).find(key => key.textContent.includes(char));
+                const existingColor = keyElement ? keyElement.classList[1] : null;
+
+                if (existingColor !== "green" && (existingColor !== "yellow" || currentColor === "green")) {
+                    updateKeyboardColor(char, currentColor);
+                }
             }
         }
 

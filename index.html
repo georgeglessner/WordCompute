@@ -208,7 +208,7 @@
     }
 
     function handleKeyInput(input) {
-        if (currentCol >= maxCols || isSolved) return;
+        if (currentCol >= maxCols || isSolved || gameOver) return;
 
         const gridBoxes = document.querySelectorAll(".box");
         const currentBox = gridBoxes[currentRow * maxCols + currentCol];
@@ -225,6 +225,7 @@
     }
 
     function handleBackspace() {
+        if (currentCol >= maxCols || isSolved || gameOver) return;
         if (currentCol > 0) {
             currentCol--;
             const gridBoxes = document.querySelectorAll(".box");
@@ -236,6 +237,7 @@
     }
 
     document.getElementById("enter").onclick = () => {
+        if (currentCol >= maxCols || isSolved || gameOver) return;
         handleEnter();
         if (isSolved) {
             alert("Congratulations! You've solved the puzzle!");
@@ -511,6 +513,14 @@
     }
 
     function initializeGame() {
+        const currentSeed = getSeedForToday();
+        const lastSeed = localStorage.getItem('lastSeed');
+
+        if (lastSeed !== currentSeed.toString()) {
+            localStorage.removeItem(`gameState-${lastSeed}`);
+            localStorage.setItem('lastSeed', currentSeed);
+        }
+
         wordOfTheDay = getWordOfTheDay();
         computation = generateComputation(wordOfTheDay);
         targetNumber = calculateTargetNumber(computation);

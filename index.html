@@ -6,7 +6,11 @@
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-NLTQLJLYCC"></script>
     <script>
         window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
+
+        function gtag() {
+            dataLayer.push(arguments);
+        }
+
         gtag('js', new Date());
 
         gtag('config', 'G-NLTQLJLYCC');
@@ -44,7 +48,8 @@
     <div class="modal-content">
         <span class="close">&times;</span>
         <h2>How to Play</h2>
-        <p>Find the correct 5-letter word <strong>and</strong> computation to reach the target number! Use the keyboard to input letters
+        <p>Find the correct 5-letter word <strong>and</strong> computation to reach the target number! Use the keyboard
+            to input letters
             and operators. Press ENTER to submit your answer. If the word is correct and the computation matches the
             target number, you win!</p>
 
@@ -52,9 +57,9 @@
 
         <p> For example, "S-C+O*R+E" is a valid guess.</p>
 
-        <p>Each letter has a value associated with it. This value is the value used in the computation.</p>
+        <p>Each letter has a value associated with it. This is the value used in the computation.</p>
 
-        <p>Order of operations matters. For example, "S-C+O*R+E" is evaluated as "S-C+(O*R)+E" and evaluates to 291.</p>
+        <p>Standard order of operations applies. For example, "S-C+O*R+E" is evaluated as "S-C+(O*R)+E" and evaluates to 291.</p>
 
         <p> After each guess the tiles will change colors. Below are the colors and their meaning: </p>
         <ul class="no-bullets">

@@ -17,6 +17,10 @@ p {
     color: #555;
 }
 
+p.game {
+    line-height: .5em;
+}
+
 h1 {
     font-size: 2.5em;
     color: #343a40;
@@ -43,6 +47,10 @@ h1 {
     font-size: 16px;
     font-weight: bold;
     position: relative;
+}
+
+.current-box {
+    border: 2px solid #007bff; /* Blue border to highlight the current box */
 }
 
 .box .subscript {
@@ -206,9 +214,6 @@ ul.no-bullets {
     background-color: #0056b3;
 }
 
-/* Add these styles to your existing styles.css */
-
-/* Add these styles to your existing styles.css */
 
 /* Mobile styles */
 @media (max-width: 600px) {
@@ -218,7 +223,7 @@ ul.no-bullets {
 
     .grid {
         grid-template-columns: repeat(9, 30px);
-        grid-gap: 3px;
+        grid-gap: 8px;
     }
 
     .box {
@@ -230,7 +235,7 @@ ul.no-bullets {
 
     .keyboard {
         grid-template-columns: repeat(10, 1fr);
-        gap: 5px;
+        gap: 7px;
         max-width: 100%;
     }
 

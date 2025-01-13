@@ -29,9 +29,9 @@
 <h1>WordCompute <strong id="current-seed"></strong></h1>
 <span id="help-icon" title="How to Play">❓</span>
 
-<p>Target Number: <strong id="target-number"></strong></p>
+<p class="game">Target Number: <strong id="target-number"></strong></p>
 
-<p>Last Computation: <span id="last-computation"></span></p>
+<p class="game">Last Computation: <strong><span id="last-computation"></span></strong></p>
 
 <div class="grid" id="grid"></div>
 
@@ -59,7 +59,8 @@
 
         <p>Each letter has a value associated with it. This is the value used in the computation.</p>
 
-        <p>Standard order of operations applies. For example, "S-C+O*R+E" is evaluated as "S-C+(O*R)+E" and evaluates to 291.</p>
+        <p>Standard order of operations applies. For example, "S-C+O*R+E" is evaluated as "S-C+(O*R)+E" and evaluates to
+            291.</p>
 
         <p> After each guess the tiles will change colors. Below are the colors and their meaning: </p>
         <ul class="no-bullets">
@@ -154,6 +155,7 @@
     const maxCols = 9;
     let currentRow = 0;
     let currentCol = 0;
+    let computedValue = 0;
     let isSolved = false;
     let gameOver = false;
 
@@ -225,6 +227,7 @@
             currentBox.textContent = input;
         }
 
+        updateCurrentBox();
         currentCol++;
         saveGameState();
     }
@@ -237,7 +240,17 @@
             const currentBox = gridBoxes[currentRow * maxCols + currentCol];
             currentBox.textContent = "";
             currentBox.className = "box";
+            updateCurrentBox();
             saveGameState();
+        }
+    }
+
+    function updateCurrentBox() {
+        const gridBoxes = document.querySelectorAll(".box");
+        gridBoxes.forEach(box => box.classList.remove("current-box"));
+        const currentBox = gridBoxes[currentRow * maxCols + currentCol];
+        if (currentBox) {
+            currentBox.classList.add("current-box");
         }
     }
 
@@ -350,7 +363,7 @@
             }
         }
 
-        const computedValue = computeRowValue(rowString);
+        computedValue = computeRowValue(rowString);
         if (computedValue === null) {
             clearColors(currentRowStart);
             alert("Invalid computation. Check your row!");
@@ -395,6 +408,7 @@
             gameOver = true;
             displayShareButton();
         }
+        updateCurrentBox();
         saveGameState();
     }
 
@@ -469,12 +483,15 @@
             subscript: key.querySelector('.subscript') ? key.querySelector('.subscript').textContent : ''
         }));
 
+        const lastComputation = document.getElementById("last-computation").textContent;
+
         const gameState = {
             currentRow,
             currentCol,
             gridState,
             keyboardState,
-            gameOver
+            gameOver,
+            lastComputation
         };
 
         localStorage.setItem(`gameState-${getSeedForToday()}`, JSON.stringify(gameState));
@@ -488,6 +505,9 @@
             currentRow = gameState.currentRow;
             currentCol = gameState.currentCol;
             gameOver = gameState.gameOver;
+            computedValue = gameState.lastComputation;
+
+            document.getElementById("last-computation").textContent = computedValue;
 
             const gridBoxes = document.querySelectorAll(".box");
             gameState.gridState.forEach((boxState, index) => {

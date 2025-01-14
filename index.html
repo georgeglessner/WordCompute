@@ -15,11 +15,13 @@
 
         gtag('config', 'G-NLTQLJLYCC');
     </script>
+    <title>WordCompute - A Daily Word and Math Puzzle Game</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Play WordCompute, a fun and challenging game inspired by Wordle and Nerdle. Find the correct 5-letter word and computation to reach the target number!">
-    <meta name="keywords" content="Wordle, Nerdle, WordCompute, word game, puzzle game, computation game, math game">
-    <title>WordCompute - A Daily Word and Math Puzzle Game</title>
+    <meta name="description"
+          content="Play WordCompute, a fun and challenging game inspired by Wordle and Nerdle. Find the correct 5-letter word and computation to reach the target number!">
+    <meta name="keywords"
+          content="Wordle, Nerdle, WordCompute, word game, puzzle game, computation game, math game, daily puzzle, brain teaser, logic game, educational game, number puzzle, word puzzle, online game, free game, fun game, challenging game">
     <link rel="stylesheet" href="styles.css">
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
@@ -32,18 +34,21 @@
             "name": "WordCompute",
             "url": "https://wordcompute.com",
             "description": "Play WordCompute, a fun and challenging game inspired by Wordle and Nerdle. Find the correct 5-letter word and computation to reach the target number!",
-            "keywords": "Wordle, Nerdle, WordCompute, word game, puzzle game, computation game, math game"
+            "keywords": "Wordle, Nerdle, WordCompute, word game, puzzle game, computation game, math game, daily puzzle, brain teaser, logic game, educational game, number puzzle, word puzzle, online game, free game, fun game, challenging game"
         }
     </script>
 </head>
 
 <body>
-<h1>WordCompute <strong id="current-seed"></strong></h1>
+<h1>WordCompute</h1>
 <span id="help-icon" title="How to Play">❓</span>
 
-<p class="game">Target Number: <strong id="target-number"></strong></p>
+<div class="info-container">
+    <p class="info-title">Target Number: <span class="info-box" id="target-number"></span></p>
+    <p class="info-title">Last Computation: <span class="info-box" id="last-computation"></span></p>
+</div>
 
-<p class="game">Last Computation: <strong><span id="last-computation"></span></strong></p>
+<div id="share-container"></div>
 
 <div class="grid" id="grid"></div>
 
@@ -427,6 +432,7 @@
     function displayShareButton() {
         const emojiGrid = generateEmojiGrid();
         const shareButton = document.createElement("button");
+        const shareContainer = document.getElementById("share-container");
         shareButton.textContent = "Share";
         shareButton.className = "share-button";
         shareButton.onclick = () => {
@@ -434,7 +440,7 @@
                 alert("Grid copied to clipboard!");
             });
         };
-        document.body.insertBefore(shareButton, gridContainer);
+        shareContainer.appendChild(shareButton);
         saveGameState();
     }
 
@@ -563,7 +569,7 @@
         targetNumber = calculateTargetNumber(computation);
 
         document.getElementById("target-number").textContent = targetNumber;
-        document.getElementById("current-seed").textContent = `#${getSeedForToday()}`;
+        document.getElementById("last-computation").textContent = computedValue;
     }
 
     document.addEventListener("DOMContentLoaded", () => {

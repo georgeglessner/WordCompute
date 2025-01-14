@@ -7,7 +7,6 @@ body {
     display: flex;
     flex-direction: column;
     align-items: center;
-    min-height: 100vh;
 }
 
 p {
@@ -24,7 +23,7 @@ p.game {
 h1 {
     font-size: 2.5em;
     color: #343a40;
-    margin-bottom: 0.5em;
+    margin-bottom: 0.2em;
     text-align: center;
     text-transform: uppercase;
     letter-spacing: 2px;
@@ -212,6 +211,37 @@ ul.no-bullets {
 
 .share-button:hover {
     background-color: #0056b3;
+}
+
+.info-container {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin: 10px 0;
+}
+
+.info-title {
+    font-size: 0.9em;
+    font-weight: bold;
+    color: #343a40;
+    margin: 0;
+}
+
+.info-content {
+    font-size: 1.2em;
+    color: #007bff;
+    font-weight: normal;
+}
+
+.info-box {
+    display: inline-block;
+    padding: 2px 5px;
+    border: 1px solid #ced4da;
+    border-radius: 3px;
+    background-color: #f8f9fa;
+    font-size: 1.2em;
+    color: #007bff;
+    font-weight: normal;
 }
 
 

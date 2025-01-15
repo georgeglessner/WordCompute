@@ -64,6 +64,25 @@
     <div class="modal-content">
         <span class="close">&times;</span>
         <h2>Game Stats</h2>
+        <div id="stats-summary">
+            <div class="stat-item">
+                <h3>Games Played</h3>
+                <p id="games-played">0</p>
+            </div>
+            <div class="stat-item">
+                <h3>Win Percentage</h3>
+                <p id="win-percentage">0%</p>
+            </div>
+            <div class="stat-item">
+                <h3>Current Win Streak</h3>
+                <p id="current-streak">0</p>
+            </div>
+            <div class="stat-item">
+                <h3>Max Win Streak</h3>
+                <p id="max-streak">0</p>
+            </div>
+        </div>
+        <h3 id="guess-distribution">Guess Distribution</h3>
         <div id="stats-graph"></div>
     </div>
 </div>
@@ -450,6 +469,7 @@
         if (currentRow >= maxRows) {
             alert(`Game over! The correct solution was: ${computation}`);
             gameOver = true;
+            updateStats(currentRow + 1);
             displayShareButton();
         }
         updateCurrentBox();
@@ -514,19 +534,55 @@
     }
 
     function updateStats(guesses) {
-        const stats = JSON.parse(localStorage.getItem('stats')) || { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0 };
-        if (guesses >= 1 && guesses <= 6) {
+        const stats = JSON.parse(localStorage.getItem('stats')) || {
+            1: 0,
+            2: 0,
+            3: 0,
+            4: 0,
+            5: 0,
+            6: 0,
+            gamesPlayed: 0,
+            wins: 0,
+            currentStreak: 0,
+            maxStreak: 0
+        };
+        stats.gamesPlayed++;
+        if (guesses >= 1 && guesses <= 6 && isSolved) {
             stats[guesses]++;
+            stats.wins++;
+            stats.currentStreak++;
+            if (stats.currentStreak > stats.maxStreak) {
+                stats.maxStreak = stats.currentStreak;
+            }
+        } else {
+            stats.currentStreak = 0;
         }
         localStorage.setItem('stats', JSON.stringify(stats));
     }
 
     function displayStats() {
-        const stats = JSON.parse(localStorage.getItem('stats')) || { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0 };
+        const stats = JSON.parse(localStorage.getItem('stats')) || {
+            1: 0,
+            2: 0,
+            3: 0,
+            4: 0,
+            5: 0,
+            6: 0,
+            gamesPlayed: 0,
+            wins: 0,
+            currentStreak: 0,
+            maxStreak: 0
+        };
         const statsGraph = document.getElementById('stats-graph');
         statsGraph.innerHTML = '';
 
-        const maxCount = Math.max(...Object.values(stats));
+        document.getElementById('games-played').textContent = stats.gamesPlayed || 0;
+        const winPercent = stats.gamesPlayed ? ((stats.wins / stats.gamesPlayed) * 100).toFixed(2) : 0;
+        document.getElementById('win-percentage').textContent = `${winPercent}%`;
+        document.getElementById('current-streak').textContent = stats.currentStreak || 0;
+        document.getElementById('max-streak').textContent = stats.maxStreak || 0;
+
+        const maxCount = Math.max(...Object.values(stats).slice(0, 6), 0);
 
         for (let i = 1; i <= 6; i++) {
             const barContainer = document.createElement('div');
@@ -539,7 +595,7 @@
             const bar = document.createElement('div');
             bar.className = 'stats-bar-fill';
             bar.style.width = `${(stats[i] / maxCount) * 100}%`;
-            bar.textContent = stats[i];
+            bar.textContent = stats[i] || 0;
 
             barContainer.appendChild(label);
             barContainer.appendChild(bar);
@@ -642,6 +698,8 @@
         const statsButton = document.getElementById("stats-button");
         const statsModal = document.getElementById("stats-modal");
         const closeStatsModal = document.querySelector("#stats-modal .close");
+        const helpModal = document.getElementById("help-modal");
+        const closeHelpButton = helpModal.querySelector('.close');
 
         statsButton.onclick = function () {
             statsModal.style.display = "block";
@@ -651,9 +709,15 @@
             statsModal.style.display = "none";
         }
 
+        closeHelpButton.onclick = function () {
+            helpModal.style.display = "none";
+        }
+
         window.onclick = function (event) {
             if (event.target == statsModal) {
                 statsModal.style.display = "none";
+            } else if (event.target == helpModal) {
+                helpModal.style.display = "none";
             }
         }
     });

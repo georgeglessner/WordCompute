@@ -55,7 +55,18 @@
 
 <body>
 <h1>WordCompute</h1>
-<span id="help-icon" title="How to Play">❓</span>
+<div id="header-icons">
+    <span id="help-icon" title="How to Play">❓</span>
+    <span id="stats-button" title="View Stats">📊</span>
+</div>
+
+<div id="stats-modal" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2>Game Stats</h2>
+        <div id="stats-graph"></div>
+    </div>
+</div>
 
 <div class="info-container">
     <p class="info-title">Target Number: <span class="info-box" id="target-number"></span></p>
@@ -412,7 +423,9 @@
         if (solutionCorrect && computedValue === targetNumber) {
             isSolved = true;
             gameOver = true;
+            updateStats(currentRow + 1);
             displayShareButton();
+            displayStats();
             return;
         }
 
@@ -498,6 +511,40 @@
         }
 
         return emojiGrid;
+    }
+
+    function updateStats(guesses) {
+        const stats = JSON.parse(localStorage.getItem('stats')) || { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0 };
+        if (guesses >= 1 && guesses <= 6) {
+            stats[guesses]++;
+        }
+        localStorage.setItem('stats', JSON.stringify(stats));
+    }
+
+    function displayStats() {
+        const stats = JSON.parse(localStorage.getItem('stats')) || { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0 };
+        const statsGraph = document.getElementById('stats-graph');
+        statsGraph.innerHTML = '';
+
+        const maxCount = Math.max(...Object.values(stats));
+
+        for (let i = 1; i <= 6; i++) {
+            const barContainer = document.createElement('div');
+            barContainer.className = 'stats-bar';
+
+            const label = document.createElement('div');
+            label.className = 'stats-bar-label';
+            label.textContent = `${i}: `;
+
+            const bar = document.createElement('div');
+            bar.className = 'stats-bar-fill';
+            bar.style.width = `${(stats[i] / maxCount) * 100}%`;
+            bar.textContent = stats[i];
+
+            barContainer.appendChild(label);
+            barContainer.appendChild(bar);
+            statsGraph.appendChild(barContainer);
+        }
     }
 
     function saveGameState() {
@@ -590,6 +637,25 @@
         initializeGame();
         // clearGameState();
         loadGameState();
+        displayStats();
+
+        const statsButton = document.getElementById("stats-button");
+        const statsModal = document.getElementById("stats-modal");
+        const closeStatsModal = document.querySelector("#stats-modal .close");
+
+        statsButton.onclick = function () {
+            statsModal.style.display = "block";
+        }
+
+        closeStatsModal.onclick = function () {
+            statsModal.style.display = "none";
+        }
+
+        window.onclick = function (event) {
+            if (event.target == statsModal) {
+                statsModal.style.display = "none";
+            }
+        }
     });
 </script>
 </body>

@@ -2040,9 +2040,6 @@ export const data = [
     "taper",
     "bloat",
     "decry",
-    "armor",
-    "cargo",
-    "chalk",
     "snide",
     "cabin",
     "twixt",
@@ -2313,5 +2310,8 @@ export const data = [
     "hymen",
     "druid",
     "heron",
-    "layer"
+    "layer",
+    "armor",
+    "cargo",
+    "chalk"
 ]

@@ -328,6 +328,7 @@ ul.no-bullets {
     background-color: #007bff;
     border-radius: 5px;
     transition: width 0.3s;
+    padding-left: 5px;
 }
 
 #stats-summary {

@@ -265,6 +265,7 @@ ul.no-bullets {
 #stats-button {
     cursor: pointer;
     font-size: 24px;
+    margin-left: 10px;
 }
 
 .stats-bar-label {
@@ -396,20 +397,17 @@ ul.no-bullets {
     }
 
     .modal-content h2 {
-        font-size: 1.5em;
-        color: #343a40;
-        margin-bottom: 1em;
-        text-align: center;
-        text-transform: uppercase;
-        letter-spacing: 2px;
+        font-size: 1.2em;
+        margin-bottom: 0.5em;
     }
 
-    .modal-content p {
-        font-size: 14px;
-    }
-
+    .modal-content p,
     .modal-content ul.no-bullets li {
-        font-size: 14px;
+        font-size: 0.9em;
+    }
+
+    .modal .close {
+        font-size: 24px;
     }
 
     #help-icon {

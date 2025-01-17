@@ -320,6 +320,15 @@
 
     function handleBackspace() {
         if (currentCol > maxCols || isSolved || gameOver) return;
+
+        if (currentCol === 0) {
+            const gridBoxes = document.querySelectorAll(".box");
+            const currentBox = gridBoxes[currentRow * maxCols + currentCol];
+            currentBox.textContent = "";
+            currentBox.className = "box current-box";
+            saveGameState();
+        }
+
         if (currentCol > 0) {
             const gridBoxes = document.querySelectorAll(".box");
             const currentBox = gridBoxes[currentRow * maxCols + currentCol];

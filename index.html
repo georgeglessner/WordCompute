@@ -40,8 +40,8 @@
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png">
-    <link rel="icon" href="favicon.ico" type="image/x-icon" />
-    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon" />
+    <link rel="icon" href="favicon.ico" type="image/x-icon"/>
+    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon"/>
     <link rel="manifest" href="/site.webmanifest">
     <script type="application/ld+json">
         {
@@ -241,6 +241,27 @@
         gridContainer.appendChild(box);
     });
 
+    const gridBoxes = document.querySelectorAll(".box");
+    gridBoxes.forEach((box, index) => {
+        box.addEventListener("click", () => handleTileClick(index));
+    });
+
+    function handleTileClick(index) {
+        if (isSolved || gameOver) return;
+
+        const currentBox = gridBoxes[index];
+
+        const rowIndex = Math.floor(index / maxCols);
+        if (rowIndex !== currentRow) return;
+
+        currentCol = index % maxCols;
+
+        gridBoxes.forEach(box => box.classList.remove("current-box"));
+
+        currentBox.classList.add("current-box");
+
+    }
+
     // Generate keyboard
     const qwertyLayout = [
         "QWERTYUIOP",
@@ -290,19 +311,21 @@
             currentBox.textContent = input;
         }
 
+        if (currentCol < maxCols - 1) {
+            currentCol++;
+        }
         updateCurrentBox();
-        currentCol++;
         saveGameState();
     }
 
     function handleBackspace() {
         if (currentCol > maxCols || isSolved || gameOver) return;
         if (currentCol > 0) {
-            currentCol--;
             const gridBoxes = document.querySelectorAll(".box");
             const currentBox = gridBoxes[currentRow * maxCols + currentCol];
             currentBox.textContent = "";
             currentBox.className = "box";
+            currentCol--;
             updateCurrentBox();
             saveGameState();
         }
@@ -356,7 +379,7 @@
     }
 
     function handleEnter() {
-        if (currentCol < maxCols || isSolved) return;
+        if (currentCol > maxCols || isSolved) return;
 
         const gridBoxes = document.querySelectorAll(".box");
         const currentRowStart = currentRow * maxCols;

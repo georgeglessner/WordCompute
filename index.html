@@ -334,6 +334,7 @@
     function updateCurrentBox() {
         const gridBoxes = document.querySelectorAll(".box");
         gridBoxes.forEach(box => box.classList.remove("current-box"));
+        if(isSolved || gameOver) return;
         const currentBox = gridBoxes[currentRow * maxCols + currentCol];
         if (currentBox) {
             currentBox.classList.add("current-box");
@@ -469,6 +470,7 @@
             gameOver = true;
             updateStats(currentRow + 1);
             displayShareButton();
+            updateCurrentBox();
             displayStats();
             return;
         }

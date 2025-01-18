@@ -550,7 +550,7 @@
         const gridBoxes = document.querySelectorAll(".box");
         let emojiGrid = `WordCompute - #${getSeedForToday()}\n\n`;
 
-        for (let row = 0; row < maxRows; row++) {
+        for (let row = 0; row <= currentRow; row++) {
             for (let col = 0; col < maxCols; col++) {
                 const box = gridBoxes[row * maxCols + col];
                 if (box.classList.contains("green")) {
@@ -563,7 +563,7 @@
                     emojiGrid += "⬜";
                 }
             }
-            emojiGrid += "\n";
+            emojiGrid += "  \n";
         }
 
         return emojiGrid;

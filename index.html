@@ -216,6 +216,7 @@
 
     const maxRows = 6;
     const maxCols = 9;
+    const currentSeed = getSeedForToday();
     let currentRow = 0;
     let currentCol = 0;
     let computedValue = 0;
@@ -548,7 +549,7 @@
 
     function generateEmojiGrid() {
         const gridBoxes = document.querySelectorAll(".box");
-        let emojiGrid = `WordCompute - #${getSeedForToday()}\n\n`;
+        let emojiGrid = `WordCompute - #${currentSeed}\n\n`;
 
         for (let row = 0; row <= currentRow; row++) {
             for (let col = 0; col < maxCols; col++) {
@@ -665,7 +666,7 @@
             lastComputation
         };
 
-        localStorage.setItem(`gameState-${getSeedForToday()}`, JSON.stringify(gameState));
+        localStorage.setItem(`gameState-${currentSeed}`, JSON.stringify(gameState));
     }
 
     function loadGameState() {
@@ -700,8 +701,14 @@
 
             if (gameOver) {
                 displayShareButton();
+                removeCurrentBoxClass();
             }
         }
+    }
+
+    function removeCurrentBoxClass() {
+        const currentBoxes = document.querySelectorAll('.current-box');
+        currentBoxes.forEach(box => box.classList.remove('current-box'));
     }
 
     function clearGameState() {

@@ -233,12 +233,6 @@ ul.no-bullets {
     margin: 10px 0;
 }
 
-.info-title {
-    font-size: 0.9em;
-    font-weight: bold;
-    color: #343a40;
-    margin: 0;
-}
 
 .info-content {
     font-size: 1.2em;
@@ -438,5 +432,20 @@ ul.no-bullets {
         font-size: 1em;
         color: #007bff;
         font-weight: bold;
+    }
+
+    #target-number, #last-computation {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+        width: 100%;
+    }
+
+    .box {
+        display: inline-block;
+        margin: 0 2px;
     }
 }

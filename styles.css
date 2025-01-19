@@ -219,7 +219,6 @@ ul.no-bullets {
     font-weight: bold;
     border-radius: 5px;
     cursor: pointer;
-    margin-top: 20px;
 }
 
 .share-button:hover {
@@ -463,5 +462,10 @@ ul.no-bullets {
 
     .info-title {
         margin-top: 0px;
+    }
+
+    .share-button {
+        margin-top: 2px;
+        margin-bottom: 10px;
     }
 }

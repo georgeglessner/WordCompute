@@ -361,6 +361,7 @@ ul.no-bullets {
     .grid {
         grid-template-columns: repeat(9, 30px);
         grid-gap: 8px;
+        margin-top: 0px;
     }
 
     .box {

@@ -176,9 +176,31 @@
         return data[seedIndex].toUpperCase();
     }
 
+    function shuffleArray(array, seed) {
+        let m = array.length, t, i;
+        while (m) {
+            i = Math.floor(seededRandom(seed + m) * m--);
+            t = array[m];
+            array[m] = array[i];
+            array[i] = t;
+        }
+        return array;
+    }
+
+    function dateFeatureFlag() {
+        // Used to enable a feature on a specific date
+        const today = new Date();
+        const featureDate = new Date('2025-01-22');
+        return today >= featureDate;
+    }
+
     function generateComputation(word) {
         const seed = getSeedForToday();
-        const operators = ['+', '-', '*'];
+        let tmpOps = ['+', '-', '*'];
+        if (dateFeatureFlag()) {
+            tmpOps = shuffleArray(['+', '-', '*'], seed);
+        }
+        const operators = tmpOps;
         let computation = '';
 
         for (let i = 0; i < word.length; i++) {
@@ -344,7 +366,7 @@
     function updateCurrentBox() {
         const gridBoxes = document.querySelectorAll(".box");
         gridBoxes.forEach(box => box.classList.remove("current-box"));
-        if(isSolved || gameOver) return;
+        if (isSolved || gameOver) return;
         const currentBox = gridBoxes[currentRow * maxCols + currentCol];
         if (currentBox) {
             currentBox.classList.add("current-box");

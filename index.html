@@ -177,6 +177,7 @@
     }
 
     function shuffleArray(array, seed) {
+        // https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle#JavaScript_Implementation
         for (let i = array.length - 1; i >= 1; i--) {
             const j = Math.floor(seededRandom(seed) * (i + 1));
             [array[i], array[j]] = [array[j], array[i]];

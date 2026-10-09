@@ -199,7 +199,7 @@ function render({reveal = -1} = {}) {
         const complete = guess ?? (isDraft && state.draft.every(Boolean) ? state.draft.join('') : null);
         const total = complete ? String(evaluate(complete)) : '';
         value.textContent = total;
-        value.classList.toggle('long', total.length > 5);
+        value.classList.toggle('long', total.length > 4);
         value.classList.toggle('preview', !guess);
         value.classList.toggle('hit', Boolean(guess) && evaluate(guess) === puzzle.target);
         row.setAttribute('aria-label', guess ? `Guess ${r + 1}: ${guess}, value ${evaluate(guess)}` : `Row ${r + 1}`);
@@ -207,9 +207,8 @@ function render({reveal = -1} = {}) {
 
     const marks = keyMarks(state.guesses, puzzle.solution);
     for (const [key, button] of Object.entries(keys)) {
-        button.classList.remove('correct', 'present', 'absent', 'off');
+        button.classList.remove('correct', 'present', 'absent');
         if (marks[key]) button.classList.add(marks[key]);
-        if (key.length === 1 && playing && !fitsSlot(key, state.cursor)) button.classList.add('off');
     }
     keyboard.classList.toggle('done', !playing);
 }

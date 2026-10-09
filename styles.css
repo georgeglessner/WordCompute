@@ -15,12 +15,18 @@
     --on-mark: #ffffff;
     --shadow: 0 10px 40px rgba(15, 23, 42, 0.18);
 
-    --gap: 4px;
-    --value-col: 44px;
-    --chrome: 340px;
+    --gap: 3px;
+    --value-col: 38px;
+    --op-ratio: 0.6;
+    --key-h: clamp(42px, 6.5dvh, 58px);
+    --chrome: calc(4 * var(--key-h) + 180px);
     --fit-h: max(30px, calc((100dvh - var(--chrome)) / 6 - var(--gap)));
-    --tile: min(52px, calc((100vw - 24px - var(--value-col) - 9 * var(--gap)) / 9), var(--fit-h));
-    --tile-h: min(max(var(--tile), min(var(--tile) * 1.35, 48px)), var(--fit-h));
+    --tile: min(
+        56px,
+        calc((100vw - 24px - 2 * var(--value-col) - 8 * var(--gap)) / (5 + 4 * var(--op-ratio))),
+        var(--fit-h)
+    );
+    --tile-h: min(var(--tile) * 1.5, 62px, var(--fit-h));
 
     color-scheme: light;
 }
@@ -168,20 +174,16 @@ a {
     gap: var(--gap);
 }
 
-@media (min-width: 600px) {
-    .board {
-        margin-left: var(--value-col);
-    }
-}
-
 .row {
-    display: grid;
-    grid-template-columns: repeat(9, var(--tile)) var(--value-col);
+    position: relative;
+    display: flex;
     gap: var(--gap);
+    padding: 0 var(--value-col);
 }
 
 .tile {
     position: relative;
+    flex: none;
     width: var(--tile);
     height: var(--tile-h);
     display: grid;
@@ -196,6 +198,7 @@ a {
 }
 
 .tile.op-slot {
+    width: calc(var(--tile) * var(--op-ratio));
     border-style: dashed;
 }
 
@@ -239,8 +242,12 @@ a {
 }
 
 .row-value {
-    align-self: center;
-    padding-left: 2px;
+    position: absolute;
+    top: 50%;
+    right: 0;
+    width: var(--value-col);
+    transform: translateY(-50%);
+    padding-left: 5px;
     font-size: 0.85rem;
     font-weight: 700;
     font-variant-numeric: tabular-nums;
@@ -285,7 +292,7 @@ a {
     position: relative;
     flex: 1 1 0;
     max-width: 46px;
-    height: 52px;
+    height: var(--key-h);
     padding: 0;
     border: 0;
     border-radius: 6px;
@@ -315,7 +322,7 @@ a {
 
 .key.op {
     max-width: 96px;
-    height: 46px;
+    height: calc(var(--key-h) - 8px);
     font-size: 1.5rem;
 }
 
@@ -330,10 +337,6 @@ a {
 .key.correct { background: var(--correct); }
 .key.present { background: var(--present); }
 .key.absent { background: var(--absent); }
-
-.key.off {
-    opacity: 0.5;
-}
 
 .keyboard.done .key {
     cursor: default;
@@ -428,7 +431,7 @@ a {
 }
 
 .example {
-    --tile: min(36px, calc((92vw - 40px - 8 * 3px) / 9));
+    --tile: min(40px, calc((92vw - 40px - 8 * 3px) / (5 + 4 * var(--op-ratio))));
     display: flex;
     gap: 3px;
     margin: 4px 0 14px;
@@ -598,13 +601,6 @@ a {
 
 @keyframes rise {
     from { opacity: 0; transform: translateY(12px); }
-}
-
-@media (max-height: 640px) {
-    .key { height: 44px; }
-    .key.op { height: 38px; }
-    .target { margin-top: 6px; }
-    :root { --chrome: 300px; }
 }
 
 @media (prefers-reduced-motion: reduce) {

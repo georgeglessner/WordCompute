@@ -17,7 +17,9 @@
     </script>
     <title>WordCompute - A Daily Word and Math Puzzle Game</title>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#f4f7fb" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#121417" media="(prefers-color-scheme: dark)">
     <meta name="description"
           content="Play WordCompute, a fun and challenging game inspired by Wordle and Nerdle. Find the correct 5-letter word and computation to reach the target number!">
     <meta name="keywords"
@@ -37,11 +39,13 @@
           content="Play WordCompute, a fun and challenging game inspired by Wordle and Nerdle. Find the correct 5-letter word and computation to reach the target number!">
     <meta name="twitter:image" content="https://wordcompute.com/images/og-image.png">
     <link rel="stylesheet" href="styles.css">
-    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <link rel="modulepreload" href="game.js">
+    <link rel="modulepreload" href="wordlist.js">
+    <link rel="modulepreload" href="validwords.js">
+    <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32.png">
     <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16.png">
     <link rel="icon" href="favicon.ico" type="image/x-icon"/>
-    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon"/>
     <link rel="manifest" href="/site.webmanifest">
     <script type="application/ld+json">
         {
@@ -56,738 +60,70 @@
 </head>
 
 <body>
-<h1>WordCompute</h1>
-<div id="header-icons">
-    <span id="help-icon" title="How to Play">❓</span>
-    <span id="stats-button" title="View Stats">📊</span>
-</div>
+<header class="topbar">
+    <button class="icon-button" id="help-button" type="button" aria-label="How to play" title="How to play">?</button>
+    <h1>WordCompute</h1>
+    <button class="icon-button" id="stats-button" type="button" aria-label="Statistics" title="Statistics">
+        <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path fill="currentColor" d="M4 20h4V10H4v10zm6 0h4V4h-4v16zm6 0h4v-7h-4v7z"/></svg>
+    </button>
+</header>
 
-<div id="stats-modal" class="modal">
-    <div class="modal-content">
-        <span class="close">&times;</span>
-        <h2>Game Stats</h2>
-        <div id="stats-summary">
-            <div class="stat-item">
-                <h3>Games Played</h3>
-                <p id="games-played">0</p>
-            </div>
-            <div class="stat-item">
-                <h3>Win Percentage</h3>
-                <p id="win-percentage">0%</p>
-            </div>
-            <div class="stat-item">
-                <h3>Current Win Streak</h3>
-                <p id="current-streak">0</p>
-            </div>
-            <div class="stat-item">
-                <h3>Max Win Streak</h3>
-                <p id="max-streak">0</p>
-            </div>
+<main class="game">
+    <section class="target" aria-live="polite">
+        <span class="target-label">Target</span>
+        <span class="target-value" id="target-number">&nbsp;</span>
+        <span class="puzzle-number" id="puzzle-number"></span>
+    </section>
+
+    <div class="board-wrap">
+        <div class="board" id="board" role="grid" aria-label="Guesses"></div>
+    </div>
+
+    <div class="keyboard" id="keyboard" aria-label="Keyboard"></div>
+</main>
+
+<div class="toasts" id="toasts" role="status" aria-live="assertive"></div>
+
+<dialog id="help-modal" class="modal" aria-labelledby="help-title">
+    <form method="dialog"><button class="close" aria-label="Close">&times;</button></form>
+    <h2 id="help-title">How to Play</h2>
+    <p>Find the 5-letter word <strong>and</strong> the operators between its letters that reach the target number.</p>
+    <p>Every letter has a value: A is 1, B is 2, up to Z at 26. Letters and operators alternate, so each guess is a word with an operator in every gap.</p>
+    <div class="example" aria-label="Example guess S minus C plus O times R plus E">
+        <span class="tile correct">S<sub>19</sub></span><span class="tile op-slot">−</span><span class="tile present">C<sub>3</sub></span><span class="tile op-slot">+</span><span class="tile absent">O<sub>15</sub></span><span class="tile op-slot">×</span><span class="tile">R<sub>18</sub></span><span class="tile op-slot">+</span><span class="tile">E<sub>5</sub></span>
+    </div>
+    <p>Standard order of operations applies, so S−C+O×R+E is 19 − 3 + (15 × 18) + 5 = <strong>291</strong>. The value of each guess appears beside its row.</p>
+    <ul class="legend">
+        <li><span class="swatch correct"></span><span><strong>S</strong> is in the right spot.</span></li>
+        <li><span class="swatch present"></span><span><strong>C</strong> is in the answer but in a different spot.</span></li>
+        <li><span class="swatch absent"></span><span><strong>O</strong> is not in the answer.</span></li>
+    </ul>
+    <p>Operators are scored the same way against the answer's operators. Tap a tile or use the arrow keys to move between slots.</p>
+    <p class="muted">A new puzzle every day. Inspired by <a href="https://www.nytimes.com/games/wordle/index.html">Wordle</a> and <a href="https://nerdlegame.com/">Nerdle</a>.</p>
+</dialog>
+
+<dialog id="stats-modal" class="modal" aria-labelledby="stats-title">
+    <form method="dialog"><button class="close" aria-label="Close">&times;</button></form>
+    <p class="result" id="result-message" hidden></p>
+    <h2 id="stats-title">Statistics</h2>
+    <div class="stats-summary">
+        <div><strong id="games-played">0</strong><span>Played</span></div>
+        <div><strong id="win-percentage">0</strong><span>Win %</span></div>
+        <div><strong id="current-streak">0</strong><span>Current streak</span></div>
+        <div><strong id="max-streak">0</strong><span>Max streak</span></div>
+    </div>
+    <h3>Guess Distribution</h3>
+    <div class="distribution" id="distribution"></div>
+    <div class="stats-footer" id="stats-footer" hidden>
+        <div class="countdown">
+            <span>Next puzzle</span>
+            <strong id="countdown">--:--:--</strong>
         </div>
-        <h3 id="guess-distribution">Guess Distribution</h3>
-        <div id="stats-graph"></div>
+        <button class="share-button" id="share-button" type="button">Share</button>
     </div>
-</div>
+</dialog>
 
-<div class="info-container">
-    <p class="info-title">Target Number: <span class="info-box" id="target-number"></span></p>
-    <p class="info-title">Last Computation: <span class="info-box" id="last-computation"></span></p>
-</div>
-
-<div id="share-container"></div>
-
-<div class="grid" id="grid"></div>
-
-<div class="keyboard" id="keyboard"></div>
-<div class="keyboard-operators" id="keyboard-operators"></div>
-<div class="keyboard-special">
-    <div class="key-special" id="backspace">BACKSPACE</div>
-    <div class="key-special" id="enter">ENTER</div>
-</div>
-
-
-<!-- Modal -->
-<div id="help-modal" class="modal">
-    <div class="modal-content">
-        <span class="close">&times;</span>
-        <h2>How to Play</h2>
-        <p>Find the correct 5-letter word <strong>and</strong> computation to reach the target number! Use the keyboard
-            to input letters
-            and operators. Press ENTER to submit your answer. If the word is correct and the computation matches the
-            target number, you win!</p>
-
-        <p>Each word is 5 letters long, and each letter must be followed by an operator.</p>
-
-        <p> For example, "S-C+O*R+E" is a valid guess.</p>
-
-        <p>Each letter has a value associated with it. This is the value used in the computation.</p>
-
-        <p>Standard order of operations applies. For example, "S-C+O*R+E" is evaluated as "S-C+(O*R)+E" and evaluates to
-            291.</p>
-
-        <p> After each guess the tiles will change colors. Below are the colors and their meaning: </p>
-        <ul class="no-bullets">
-            <li><span style="color: #6aaa64;">Green</span>: Correct letter or operand in the correct position</li>
-            <li><span style="color: #c9b458;">Yellow</span>: Correct letter or operand in the wrong position</li>
-            <li><span style="color: #787c7e;">Grey</span>: Incorrect letter or operand</li>
-        </ul>
-        <h2>About</h2>
-        <p> This game is inspired by <a href="https://www.nytimes.com/games/wordle/index.html">Wordle</a> and <a
-                href="https://nerdlegame.com/">Nerdle</a>.</p>
-    </div>
-</div>
-
-<script type="module">
-    import {data} from './wordlist.js';
-    import {validWords} from './validwords.js';
-
-    // Modal handling
-    const helpIcon = document.getElementById("help-icon");
-    const modal = document.getElementById("help-modal");
-    const closeModal = document.querySelector(".close");
-
-    helpIcon.onclick = function () {
-        modal.style.display = "block";
-    }
-
-    closeModal.onclick = function () {
-        modal.style.display = "none";
-    }
-
-    window.onclick = function (event) {
-        if (event.target == modal) {
-            modal.style.display = "none";
-        }
-    }
-
-    function seededRandom(seed) {
-        const x = Math.sin(seed) * 10000;
-        return x - Math.floor(x);
-    }
-
-    function getSeedForToday() {
-        const today = new Date();
-        const referenceDate = new Date('2019-01-01'); 
-        const timeDifference = today - referenceDate; 
-        const daysSinceReference = Math.floor(timeDifference / (1000 * 60 * 60 * 24)); 
-        return daysSinceReference; 
-    }
-
-    function getWordOfTheDay() {
-        const seed = getSeedForToday();
-        const seedIndex = seed % data.length;
-        return data[seedIndex].toUpperCase();
-    }
-
-    function shuffleArray(array, seed) {
-        // https://en.wikipedia.org/wiki/Fisher%E2%80%93Yates_shuffle#JavaScript_Implementation
-        for (let i = array.length - 1; i >= 1; i--) {
-            const j = Math.floor(seededRandom(seed) * (i + 1));
-            [array[i], array[j]] = [array[j], array[i]];
-        }
-        return array;
-    }
-
-    function dateFeatureFlag() {
-        // Used to enable a feature on a specific date
-        const today = new Date();
-        const featureDate = new Date('2025-01-22');
-        return today >= featureDate;
-    }
-
-    function generateComputation(word) {
-        const seed = getSeedForToday();
-        let tmpOps = ['+', '-', '*'];
-        if (dateFeatureFlag()) {
-            tmpOps = shuffleArray(['+', '-', '*'], seed);
-        }
-        const operators = tmpOps;
-        let computation = '';
-
-        for (let i = 0; i < word.length; i++) {
-            computation += word[i];
-            if (i < word.length - 1) {
-                const randomIndex = Math.floor(seededRandom(seed + i) * operators.length);
-                computation += operators[randomIndex];
-            }
-        }
-
-        return computation;
-    }
-
-    function calculateTargetNumber(computation) {
-        try {
-            const parsedComputation = computation.split('').map(char => {
-                if (letters.includes(char)) {
-                    return letterValue(char);
-                }
-                return char;
-            }).join('');
-
-            const result = eval(parsedComputation);
-
-            // Ensure the result is an integer
-            if (Number.isInteger(result)) {
-                return result;
-            } else {
-                return null;
-            }
-        } catch {
-            return null;
-        }
-    }
-
-    const maxRows = 6;
-    const maxCols = 9;
-    const currentSeed = getSeedForToday();
-    let currentRow = 0;
-    let currentCol = 0;
-    let computedValue = 0;
-    let isSolved = false;
-    let gameOver = false;
-
-    let wordOfTheDay;
-    let computation;
-    let targetNumber;
-
-
-    const gridContainer = document.getElementById("grid");
-    const keyboardContainer = document.getElementById("keyboard");
-    const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
-    const operators = ["+", "-", "*"];
-
-    // Generate grid
-    const gridSize = maxRows * maxCols;
-    const grid = Array(gridSize).fill(null);
-    grid.forEach(() => {
-        const box = document.createElement("div");
-        box.className = "box";
-        gridContainer.appendChild(box);
-    });
-
-    const gridBoxes = document.querySelectorAll(".box");
-    gridBoxes.forEach((box, index) => {
-        box.addEventListener("click", () => handleTileClick(index));
-    });
-
-    function handleTileClick(index) {
-        if (isSolved || gameOver) return;
-
-        const currentBox = gridBoxes[index];
-
-        const rowIndex = Math.floor(index / maxCols);
-        if (rowIndex !== currentRow) return;
-
-        currentCol = index % maxCols;
-
-        gridBoxes.forEach(box => box.classList.remove("current-box"));
-
-        currentBox.classList.add("current-box");
-
-    }
-
-    // Generate keyboard
-    const qwertyLayout = [
-        "QWERTYUIOP",
-        "ASDFGHJKL",
-        "ZXCVBNM"
-    ];
-
-    qwertyLayout.forEach(row => {
-        row.split("").forEach(letter => {
-            const key = document.createElement("div");
-            key.className = "key";
-            key.innerHTML = `${letter}<span class='subscript'>${letterValue(letter)}</span>`;
-            key.onclick = () => handleKeyInput(letter);
-            keyboardContainer.appendChild(key);
-        });
-        const br = document.createElement("br");
-        keyboardContainer.appendChild(br);
-    });
-
-    // Generate operators
-    const operatorsContainer = document.getElementById("keyboard-operators");
-    operators.forEach(op => {
-        const key = document.createElement("div");
-        key.className = "key";
-        key.textContent = op;
-        key.onclick = () => handleKeyInput(op);
-        operatorsContainer.appendChild(key);
-    });
-
-    document.getElementById("backspace").onclick = handleBackspace;
-    document.getElementById("enter").onclick = handleEnter;
-
-    function letterValue(letter) {
-        return letter.toUpperCase().charCodeAt(0) - 64;
-    }
-
-    function handleKeyInput(input) {
-        if (currentCol >= maxCols || isSolved || gameOver) return;
-
-        const gridBoxes = document.querySelectorAll(".box");
-        const currentBox = gridBoxes[currentRow * maxCols + currentCol];
-
-        if (letters.includes(input)) {
-            currentBox.textContent = input;
-            currentBox.innerHTML = `${input}<span class='subscript'>${letterValue(input)}</span>`;
-        } else {
-            currentBox.textContent = input;
-        }
-
-        if (currentCol < maxCols - 1) {
-            currentCol++;
-        }
-        updateCurrentBox();
-        saveGameState();
-    }
-
-    function handleBackspace() {
-        if (currentCol > maxCols || isSolved || gameOver) return;
-
-        if (currentCol === 0) {
-            const gridBoxes = document.querySelectorAll(".box");
-            const currentBox = gridBoxes[currentRow * maxCols + currentCol];
-            currentBox.textContent = "";
-            currentBox.className = "box current-box";
-            saveGameState();
-        }
-
-        if (currentCol > 0) {
-            const gridBoxes = document.querySelectorAll(".box");
-            const currentBox = gridBoxes[currentRow * maxCols + currentCol];
-            currentBox.textContent = "";
-            currentBox.className = "box";
-            currentCol--;
-            updateCurrentBox();
-            saveGameState();
-        }
-    }
-
-    function updateCurrentBox() {
-        const gridBoxes = document.querySelectorAll(".box");
-        gridBoxes.forEach(box => box.classList.remove("current-box"));
-        if (isSolved || gameOver) return;
-        const currentBox = gridBoxes[currentRow * maxCols + currentCol];
-        if (currentBox) {
-            currentBox.classList.add("current-box");
-        }
-    }
-
-    document.getElementById("enter").onclick = () => {
-        if (currentCol > maxCols || isSolved || gameOver) return;
-        handleEnter();
-        if (isSolved) {
-            alert("Congratulations! You've solved the puzzle!");
-        }
-    };
-
-    document.addEventListener("keydown", (event) => {
-        const key = event.key.toUpperCase();
-        if (letters.includes(key) || operators.includes(key)) {
-            handleKeyInput(key);
-        } else if (event.key === "Enter") {
-            handleEnter();
-            if (isSolved) {
-                alert("Congratulations! You've solved the puzzle!");
-            }
-        } else if (event.key === "Backspace") {
-            handleBackspace();
-        }
-    });
-
-    function computeRowValue(rowString) {
-        try {
-            const computation = rowString.split('').map(char => {
-                if (letters.includes(char)) {
-                    return letterValue(char);
-                } else {
-                    return char;
-                }
-            }).join('');
-
-            return eval(computation);
-        } catch {
-            return null;
-        }
-    }
-
-    function handleEnter() {
-        if (currentCol > maxCols || isSolved) return;
-
-        const gridBoxes = document.querySelectorAll(".box");
-        const currentRowStart = currentRow * maxCols;
-        let solutionCorrect = true;
-        let rowString = "";
-
-        const wordRemaining = {};
-        const operatorRemaining = {};
-
-        // Count available letters and operators in the word and computation
-        for (const char of wordOfTheDay) {
-            wordRemaining[char] = (wordRemaining[char] || 0) + 1;
-        }
-
-        for (const char of computation) {
-            if (operators.includes(char)) {
-                operatorRemaining[char] = (operatorRemaining[char] || 0) + 1;
-            }
-        }
-
-        // First pass: mark correct letters in the correct position
-        for (let i = 0; i < maxCols; i++) {
-            const box = gridBoxes[currentRowStart + i];
-            const char = box.textContent.charAt(0); // Extract letter or operator
-            rowString += char;
-
-            if (i % 2 === 0) { // Letter position
-                if (letters.includes(char) && char === wordOfTheDay[Math.floor(i / 2)]) {
-                    box.classList.add("green");
-                    wordRemaining[char]--;
-                }
-            } else { // Operator position
-                if (operators.includes(char) && char === computation[Math.floor(i / 2) * 2 + 1]) {
-                    box.classList.add("green");
-                    operatorRemaining[char]--;
-                }
-            }
-        }
-
-        // Second pass: mark correct letters in the wrong position
-        for (let i = 0; i < maxCols; i++) {
-            const box = gridBoxes[currentRowStart + i];
-            const char = box.textContent.charAt(0); // Extract letter or operator
-
-            if (i % 2 === 0) { // Letter position
-                if (letters.includes(char) && !box.classList.contains("green")) {
-                    if (wordRemaining[char]) {
-                        box.classList.add("yellow");
-                        wordRemaining[char]--;
-                        solutionCorrect = false;
-                    } else {
-                        box.classList.add("grey");
-                        solutionCorrect = false;
-                    }
-                }
-            } else { // Operator position
-                if (operators.includes(char) && !box.classList.contains("green")) {
-                    if (operatorRemaining[char]) {
-                        box.classList.add("yellow");
-                        operatorRemaining[char]--;
-                        solutionCorrect = false;
-                    } else {
-                        box.classList.add("grey");
-                        solutionCorrect = false;
-                    }
-                }
-            }
-        }
-
-        computedValue = computeRowValue(rowString);
-        if (computedValue === null) {
-            clearColors(currentRowStart);
-            alert("Invalid computation. Check your row!");
-            return;
-        }
-
-        if (!data.includes(rowString.replace(/[+\/*-]/g, "").toLowerCase()) && !validWords.includes(rowString.replace(/[+\/*-]/g, "").toLowerCase())) {
-            clearColors(currentRowStart);
-            alert("Not in word list!");
-            return;
-        }
-
-        document.getElementById("last-computation").textContent = computedValue;
-
-        if (solutionCorrect && computedValue === targetNumber) {
-            isSolved = true;
-            gameOver = true;
-            updateStats(currentRow + 1);
-            displayShareButton();
-            updateCurrentBox();
-            displayStats();
-            return;
-        }
-
-        // Update keyboard colors after all checks
-        for (let i = 0; i < maxCols; i++) {
-            const box = gridBoxes[currentRowStart + i];
-            const char = box.textContent.charAt(0);
-            if (letters.includes(char) || operators.includes(char)) {
-                const currentColor = box.classList.contains("green") ? "green" : box.classList.contains("yellow") ? "yellow" : "grey";
-                const keyElement = Array.from(document.querySelectorAll(".key")).find(key => key.textContent.includes(char));
-                const existingColor = keyElement ? keyElement.classList[1] : null;
-
-                if (existingColor !== "green" && (existingColor !== "yellow" || currentColor === "green")) {
-                    updateKeyboardColor(char, currentColor);
-                }
-            }
-        }
-
-        currentRow++;
-        currentCol = 0;
-
-        if (currentRow >= maxRows) {
-            alert(`Game over! The correct solution was: ${computation}`);
-            gameOver = true;
-            updateStats(currentRow + 1);
-            displayShareButton();
-        }
-        updateCurrentBox();
-        saveGameState();
-    }
-
-    function displayShareButton() {
-        const emojiGrid = generateEmojiGrid();
-        const shareButton = document.createElement("button");
-        const shareContainer = document.getElementById("share-container");
-        shareButton.textContent = "Share";
-        shareButton.className = "share-button";
-        shareButton.onclick = () => {
-            navigator.clipboard.writeText(emojiGrid).then(() => {
-                alert("Grid copied to clipboard!");
-            });
-        };
-        shareContainer.appendChild(shareButton);
-        saveGameState();
-    }
-
-    function updateKeyboardColor(char, color) {
-        const keys = document.querySelectorAll(".key");
-        keys.forEach(key => {
-            if (key.textContent[0] === char && (!key.classList.contains("green") || color === "green")) {
-                key.className = `key ${color}`;
-            }
-        });
-    }
-
-    function clearColors(currentRowStart) {
-        const gridBoxes = document.querySelectorAll(".box");
-        for (let i = 0; i < maxCols; i++) {
-            const box = gridBoxes[currentRowStart + i];
-            box.classList.remove("green");
-            box.classList.remove("yellow");
-            box.classList.remove("grey");
-        }
-    }
-
-    function generateEmojiGrid() {
-        const gridBoxes = document.querySelectorAll(".box");
-        let emojiGrid = `WordCompute - #${currentSeed}\n\n`;
-
-        for (let row = 0; row <= currentRow; row++) {
-            for (let col = 0; col < maxCols; col++) {
-                const box = gridBoxes[row * maxCols + col];
-                if (box.classList.contains("green")) {
-                    emojiGrid += "🟩";
-                } else if (box.classList.contains("yellow")) {
-                    emojiGrid += "🟨";
-                } else if (box.classList.contains("grey")) {
-                    emojiGrid += "⬛";
-                } else {
-                    emojiGrid += "⬜";
-                }
-            }
-            emojiGrid += "  \n";
-        }
-
-        return emojiGrid;
-    }
-
-    function updateStats(guesses) {
-        const stats = JSON.parse(localStorage.getItem('stats')) || {
-            1: 0,
-            2: 0,
-            3: 0,
-            4: 0,
-            5: 0,
-            6: 0,
-            gamesPlayed: 0,
-            wins: 0,
-            currentStreak: 0,
-            maxStreak: 0
-        };
-        stats.gamesPlayed++;
-        if (guesses >= 1 && guesses <= 6 && isSolved) {
-            stats[guesses]++;
-            stats.wins++;
-            stats.currentStreak++;
-            if (stats.currentStreak > stats.maxStreak) {
-                stats.maxStreak = stats.currentStreak;
-            }
-        } else {
-            stats.currentStreak = 0;
-        }
-        localStorage.setItem('stats', JSON.stringify(stats));
-    }
-
-    function displayStats() {
-        const stats = JSON.parse(localStorage.getItem('stats')) || {
-            1: 0,
-            2: 0,
-            3: 0,
-            4: 0,
-            5: 0,
-            6: 0,
-            gamesPlayed: 0,
-            wins: 0,
-            currentStreak: 0,
-            maxStreak: 0
-        };
-        const statsGraph = document.getElementById('stats-graph');
-        statsGraph.innerHTML = '';
-
-        document.getElementById('games-played').textContent = stats.gamesPlayed || 0;
-        const winPercent = stats.gamesPlayed ? ((stats.wins / stats.gamesPlayed) * 100).toFixed(2) : 0;
-        document.getElementById('win-percentage').textContent = `${winPercent}%`;
-        document.getElementById('current-streak').textContent = stats.currentStreak || 0;
-        document.getElementById('max-streak').textContent = stats.maxStreak || 0;
-
-        const maxCount = Math.max(...Object.values(stats).slice(0, 6), 0);
-
-        for (let i = 1; i <= 6; i++) {
-            const barContainer = document.createElement('div');
-            barContainer.className = 'stats-bar';
-
-            const label = document.createElement('div');
-            label.className = 'stats-bar-label';
-            label.textContent = `${i}: `;
-
-            const bar = document.createElement('div');
-            bar.className = 'stats-bar-fill';
-            bar.style.width = `${(stats[i] / maxCount) * 100}%`;
-            bar.textContent = stats[i] || 0;
-
-            barContainer.appendChild(label);
-            barContainer.appendChild(bar);
-            statsGraph.appendChild(barContainer);
-        }
-    }
-
-    function saveGameState() {
-        const gridBoxes = document.querySelectorAll(".box");
-        const gridState = Array.from(gridBoxes).map(box => ({
-            text: box.textContent.charAt(0), // Only save the letter
-            className: box.className,
-            subscript: box.querySelector('.subscript') ? box.querySelector('.subscript').textContent : ''
-        }));
-
-        const keyboardKeys = document.querySelectorAll(".key");
-        const keyboardState = Array.from(keyboardKeys).map(key => ({
-            text: key.textContent.charAt(0), // Only save the letter
-            className: key.className,
-            subscript: key.querySelector('.subscript') ? key.querySelector('.subscript').textContent : ''
-        }));
-
-        const lastComputation = document.getElementById("last-computation").textContent;
-
-        const gameState = {
-            currentRow,
-            currentCol,
-            gridState,
-            keyboardState,
-            gameOver,
-            lastComputation
-        };
-
-        localStorage.setItem(`gameState-${currentSeed}`, JSON.stringify(gameState));
-    }
-
-    function loadGameState() {
-        const savedState = localStorage.getItem(`gameState-${getSeedForToday()}`);
-        if (savedState) {
-            const gameState = JSON.parse(savedState);
-
-            currentRow = gameState.currentRow;
-            currentCol = gameState.currentCol;
-            gameOver = gameState.gameOver;
-            computedValue = gameState.lastComputation;
-
-            document.getElementById("last-computation").textContent = computedValue;
-
-            const gridBoxes = document.querySelectorAll(".box");
-            gameState.gridState.forEach((boxState, index) => {
-                gridBoxes[index].textContent = boxState.text;
-                gridBoxes[index].className = boxState.className;
-                if (boxState.subscript) {
-                    gridBoxes[index].innerHTML = `${boxState.text}<span class='subscript'>${boxState.subscript}</span>`;
-                }
-            });
-
-            const keyboardKeys = document.querySelectorAll(".key");
-            gameState.keyboardState.forEach((keyState, index) => {
-                keyboardKeys[index].textContent = keyState.text;
-                keyboardKeys[index].className = keyState.className;
-                if (keyState.subscript) {
-                    keyboardKeys[index].innerHTML = `${keyState.text}<span class='subscript'>${keyState.subscript}</span>`;
-                }
-            });
-
-            if (gameOver) {
-                displayShareButton();
-                removeCurrentBoxClass();
-            }
-        }
-    }
-
-    function removeCurrentBoxClass() {
-        const currentBoxes = document.querySelectorAll('.current-box');
-        currentBoxes.forEach(box => box.classList.remove('current-box'));
-    }
-
-    function clearGameState() {
-        localStorage.removeItem(`gameState-${getSeedForToday()}`);
-    }
-
-    function initializeGame() {
-        const currentSeed = getSeedForToday();
-        const lastSeed = localStorage.getItem('lastSeed');
-
-        if (lastSeed !== currentSeed.toString()) {
-            localStorage.removeItem(`gameState-${lastSeed}`);
-            localStorage.setItem('lastSeed', currentSeed);
-        }
-
-        wordOfTheDay = getWordOfTheDay();
-        computation = generateComputation(wordOfTheDay);
-        targetNumber = calculateTargetNumber(computation);
-
-        document.getElementById("target-number").textContent = targetNumber;
-        document.getElementById("last-computation").textContent = computedValue;
-    }
-
-    document.addEventListener("DOMContentLoaded", () => {
-        initializeGame();
-        // clearGameState();
-        loadGameState();
-        displayStats();
-
-        const statsButton = document.getElementById("stats-button");
-        const statsModal = document.getElementById("stats-modal");
-        const closeStatsModal = document.querySelector("#stats-modal .close");
-        const helpModal = document.getElementById("help-modal");
-        const closeHelpButton = helpModal.querySelector('.close');
-
-        statsButton.onclick = function () {
-            statsModal.style.display = "block";
-        }
-
-        closeStatsModal.onclick = function () {
-            statsModal.style.display = "none";
-        }
-
-        closeHelpButton.onclick = function () {
-            helpModal.style.display = "none";
-        }
-
-        window.onclick = function (event) {
-            if (event.target == statsModal) {
-                statsModal.style.display = "none";
-            } else if (event.target == helpModal) {
-                helpModal.style.display = "none";
-            }
-        }
-    });
-</script>
+<script type="module" src="app.js"></script>
 </body>
 
 </html>

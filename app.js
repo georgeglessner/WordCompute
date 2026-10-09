@@ -196,11 +196,9 @@ function render({reveal = -1} = {}) {
                 tile.classList.add('reveal');
             }
         });
-        const complete = guess ?? (isDraft && state.draft.every(Boolean) ? state.draft.join('') : null);
-        const total = complete ? String(evaluate(complete)) : '';
+        const total = guess ? String(evaluate(guess)) : '';
         value.textContent = total;
         value.classList.toggle('long', total.length > 4);
-        value.classList.toggle('preview', !guess);
         value.classList.toggle('hit', Boolean(guess) && evaluate(guess) === puzzle.target);
         row.setAttribute('aria-label', guess ? `Guess ${r + 1}: ${guess}, value ${evaluate(guess)}` : `Row ${r + 1}`);
     });

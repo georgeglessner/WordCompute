@@ -259,11 +259,6 @@ a {
     font-size: 0.68rem;
 }
 
-.row-value.preview {
-    color: var(--muted);
-    font-weight: 500;
-}
-
 .row-value.hit {
     color: var(--correct);
 }

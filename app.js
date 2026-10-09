@@ -340,10 +340,10 @@ function openStats() {
 $('stats-modal').addEventListener('close', () => clearInterval(countdownTimer));
 
 function tick() {
-    const total = Math.max(0, Math.floor(msUntilNextSeed() / 1000));
+    if (seedFor() !== seed) location.reload();
+    const total = Math.max(0, Math.ceil(msUntilNextSeed() / 1000));
     const pad = (n) => String(n).padStart(2, '0');
     $('countdown').textContent = `${pad(Math.floor(total / 3600))}:${pad(Math.floor(total / 60) % 60)}:${pad(total % 60)}`;
-    if (total === 0) location.reload();
 }
 
 function renderStats() {

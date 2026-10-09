@@ -18,11 +18,9 @@
     --gap: 4px;
     --value-col: 44px;
     --chrome: 340px;
-    --tile: min(52px, calc((100vw - 24px - var(--value-col) - 9 * var(--gap)) / 9));
-    --tile-h: min(
-        max(var(--tile), min(var(--tile) * 1.35, 48px)),
-        calc((100dvh - var(--chrome)) / 6 - var(--gap))
-    );
+    --fit-h: max(30px, calc((100dvh - var(--chrome)) / 6 - var(--gap)));
+    --tile: min(52px, calc((100vw - 24px - var(--value-col) - 9 * var(--gap)) / 9), var(--fit-h));
+    --tile-h: min(max(var(--tile), min(var(--tile) * 1.35, 48px)), var(--fit-h));
 
     color-scheme: light;
 }
